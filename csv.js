@@ -85,29 +85,34 @@ fs.readdirSync(directoryPath).forEach(function (file) {
 
     if (count == 2266) {
       var count2 = 0;
-      setInterval(function doThat() {
-          doslice++;
-          fetch('https://vision.googleapis.com/v1/images:annotate?key=AIzaSyAp6xBe0ZvUMW6zr1AXgeao8OlhFlSVM0U', {
-            method: 'POST',
-            body: JSON.stringify({"requests": requests.slice(doslice * 10, doslice * 10 + 10)})
-          }).then((response) => {
-            return response.json();
-          }).then((response) => {
-            response.responses.forEach((item, idx) => {
-              let line = type + "," + fileNames[count2] + "," + tags[count2]+ "," +
-                Math.round((item.faceAnnotations[0].boundingPoly.vertices[0].x / dims[count2].height) *10000) / 10000 + "," +
-                Math.round((item.faceAnnotations[0].boundingPoly.vertices[0].y / dims[count2].width)  *10000) / 10000 + "," +
-                Math.round((item.faceAnnotations[0].boundingPoly.vertices[1].x / dims[count2].height) *10000) / 10000 + "," +
-                Math.round((item.faceAnnotations[0].boundingPoly.vertices[1].y / dims[count2].width)  *10000) / 10000 + "," +
-                Math.round((item.faceAnnotations[0].boundingPoly.vertices[2].x / dims[count2].height) *10000) / 10000 + "," +
-                Math.round((item.faceAnnotations[0].boundingPoly.vertices[2].y / dims[count2].width)  *10000) / 10000 + "," +
-                Math.round((item.faceAnnotations[0].boundingPoly.vertices[3].x / dims[count2].height) *10000) / 10000 + "," +
-                Math.round((item.faceAnnotations[0].boundingPoly.vertices[3].y / dims[count2].width)  *10000) / 10000 + "\n";
-                fs.appendFileSync('model.csv', line);
-                console.log(line);
-            });
-          }).catch(console.log);
-      }, 1000);
+      var myLoop = function() {
+          setTimeout(function () {
+            doslice++;
+              fetch('https://vision.googleapis.com/v1/images:annotate?key=AIzaSyAp6xBe0ZvUMW6zr1AXgeao8OlhFlSVM0U', {
+                method: 'POST',
+                body: JSON.stringify({"requests": requests.slice(doslice * 10, doslice * 10 + 10)})
+              }).then((response) => {
+                return response.json();
+              }).then((response) => {
+                response.responses.forEach((item, idx) => {
+                  let line = type + "," + fileNames[count2] + "," + tags[count2]+ "," +
+                    Math.round((item.faceAnnotations[0].boundingPoly.vertices[0].x / dims[count2].height) *10000) / 10000 + "," +
+                    Math.round((item.faceAnnotations[0].boundingPoly.vertices[0].y / dims[count2].width)  *10000) / 10000 + "," +
+                    Math.round((item.faceAnnotations[0].boundingPoly.vertices[1].x / dims[count2].height) *10000) / 10000 + "," +
+                    Math.round((item.faceAnnotations[0].boundingPoly.vertices[1].y / dims[count2].width)  *10000) / 10000 + "," +
+                    Math.round((item.faceAnnotations[0].boundingPoly.vertices[2].x / dims[count2].height) *10000) / 10000 + "," +
+                    Math.round((item.faceAnnotations[0].boundingPoly.vertices[2].y / dims[count2].width)  *10000) / 10000 + "," +
+                    Math.round((item.faceAnnotations[0].boundingPoly.vertices[3].x / dims[count2].height) *10000) / 10000 + "," +
+                    Math.round((item.faceAnnotations[0].boundingPoly.vertices[3].y / dims[count2].width)  *10000) / 10000 + "\n";
+                    fs.appendFileSync('model2.csv', line);
+                    console.log(line);
+                    count2++;
+                });
+              }).catch(console.log).then((x) => { if (count2 < 2266) myLoop() });
+              if (count2 >= 2266) return;
+         }, 2000);
+      };
+      myLoop();
     }
   });
 });
