@@ -1,4 +1,5 @@
 # SM-Hackaton3
 Mask Detection
 
-[Some description here maybe]
+Authenticate to Google before sending requests (Linux):
+[export GOOGLE_APPLICATION_CREDENTIALS="UR_PROJECT_CREDS.json"]
