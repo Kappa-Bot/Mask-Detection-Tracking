@@ -28,12 +28,10 @@ const pre = document.getElementById('prediction');
 const c = document.getElementById("draw");
 const ctx = c.getContext("2d");
 ctx.lineWidth = 4;
-ctx.font = "28px Comic Sans MS red";
-ctx.fillStyle = "red";
+ctx.font = "24px Comic Sans MS red";
 
 
 var model;
-
 
 var pollingId = null;
 function init() {
@@ -57,7 +55,7 @@ function init() {
                 let gradient = ctx.createLinearGradient(0, 0, c.width, 0);
                 gradient.addColorStop("1.0", obj.label == "mask" ? "green" : "red");
                 ctx.strokeStyle = gradient;
-                ctx.strokeText(obj.label == "mask", obj.box.left + 4, obj.box.top - 4);
+                ctx.strokeText(obj.label == "mask" ? "Mask" : "Not Mask", obj.box.left + 4, obj.box.top - 4);
                 ctx.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.67 , obj.box.top - 4);
                 ctx.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
               });
