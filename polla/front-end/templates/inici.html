@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Mask Detection WebApp</title>
+        <meta name="author" content="hackathon-3"/>
+        <link rel= "stylesheet" type= "text/css" href="{{ url_for('static', filename='styles/inici.css') }}">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    </head>
+     
+    <body>
+
+        <h1 class="header"><a href="/">MASK DETECTION</a></h1>
+        <h2><img src="mask.png" class="mask" alt="mask-icon"/></h2>
+
+        <form class="uploadFile" action="model" method="POST" enctype="multipart/form-data">
+            
+            <div class="input">
+                <input class="inputfile" id="file" type="file" name="files">
+            </div>
+            <div class="upload">
+                <input class="uploadButton" type="submit" value="Upload">
+            </div>
+        
+        </form>
+
+     
+        <footer class="footer">
+                <p>&copy; Hackathon-3</p>
+        </footer>
+        
+    </body>
+ 
+</html>
