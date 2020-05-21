@@ -1,0 +1,57 @@
+<script src="https://unpkg.com/@tensorflow/tfjs"></script>
+<script src="https://unpkg.com/@tensorflow/tfjs-automl"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+<body>
+  <div>
+    <button onclick="init()">Evaluate Live WebCam</button>
+    <button onclick="stop()">Stop Evaluating</button> <br/>
+    <div id="result" style="display:block"></div>
+    <div id="prediction" style="display:inline-block"></div>
+  </div>
+  <div>
+    <div id="cam" style="position:absolute"></div>
+    <canvas id="draw" width="640" height="480" style="position:absolute; border:2px solid black;"></canvas>
+  </div>
+
+</body>
+<script>
+var c = document.getElementById("draw");
+var ctx = c.getContext("2d");
+ctx.lineWidth = 4;
+ctx.font = "28px Comic Sans MS red";
+ctx.fillStyle = "red";
+Webcam.set({
+  width:        640,
+  height:       480,
+  image_format: 'jpeg',
+  jpeg_quality: '40'
+})
+Webcam.attach('#cam')
+function snapshot() {
+  Webcam.snap(function(data_uri) {
+    //document.getElementById('result').innerHTML = '<img id="shot" src="' + data_uri + '"/>';
+    async function run() {
+        const img = document.createElement('img');
+        img.src = data_uri;
+        const pre = document.getElementById('prediction');
+        const model = await tf.automl.loadObjectDetection('model.json');
+        const predictions = await model.detect(img, {
+          score:  0.4, //Tune this pls :(
+          iou:    0.5,
+          topk:   20
+        });
+        pre.textContent = JSON.stringify(predictions, null, 4);
+        console.log(predictions[0]);
+        ctx.clearRect(0, 0, c.width, c.height);
+        ctx.beginPath();
+        ctx.strokeText(predictions[0].label, predictions[0].box.left + 4, predictions[0].box.top - 4);
+        ctx.rect(predictions[0].box.left, predictions[0].box.top, predictions[0].box.width, predictions[0].box.height);
+        ctx.stroke();
+    };
+    run();
+  });
+};
+var pollingId = null;
+function init() { pollingId = setInterval(snapshot, 300); };
+function stop() { clearInterval(pollingId); };
+</script>
