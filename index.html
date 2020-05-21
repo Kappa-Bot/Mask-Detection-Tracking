@@ -33,33 +33,37 @@ ctx.fillStyle = "red";
 
 
 var model;
-function run(data_uri) {
-    img.src = data_uri;
-    ctx.clearRect(0, 0, c.width, c.height);
-    model.detect(img, {
-      score:  0.3, //Tune this pls :(
-      iou:    0.5,
-      topk:   20
-    }).then((predictions) => {
-      pre.innerText = JSON.stringify(predictions, null, 10);
-      predictions.forEach(obj => {
-        let gradient = ctx.createLinearGradient(0, 0, c.width, 0);
-        gradient.addColorStop("1.0", obj.label == "mask" ? "green" : "red");
-        ctx.strokeStyle = gradient;
-        ctx.strokeText(obj.label, obj.box.left + 4, obj.box.top - 4);
-        ctx.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.67 , obj.box.top - 4);
-        ctx.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
-      });
-    });
-};
+
 
 var pollingId = null;
-async function init() {
+function init() {
   tf.automl.loadObjectDetection('model.json').then(mdl => {
     model = mdl;
-  }).then(() => {
+  }).catch((x) => console.log("Error of this shit")).then(() => {
     pollingId = setInterval(() => {
-      Webcam.snap(run);
+      Webcam.snap(function run(data_uri) {
+          img.src = data_uri;
+          ctx.clearRect(0, 0, c.width, c.height);
+          model.detect(img, {
+            score:  0.7, //Tune this pls :(
+            iou:    0.5,
+            topk:   20
+          }).catch((x) => {
+            return [];
+          }).then((predictions) => {
+            if (predictions != []) {
+              pre.innerText = JSON.stringify(predictions, null, 10);
+              predictions.forEach(obj => {
+                let gradient = ctx.createLinearGradient(0, 0, c.width, 0);
+                gradient.addColorStop("1.0", obj.label == "mask" ? "green" : "red");
+                ctx.strokeStyle = gradient;
+                ctx.strokeText(obj.label == "mask", obj.box.left + 4, obj.box.top - 4);
+                ctx.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.67 , obj.box.top - 4);
+                ctx.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
+              });
+            } else pre.innerText = JSON.stringify("Loading...", null, 10);
+          });
+      });
     }, 200);
   });
 };
