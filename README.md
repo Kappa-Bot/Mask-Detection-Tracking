@@ -1,11 +1,9 @@
-# SM-Hackaton3
-## Mask Detection + Tracking
+# SM-Hackaton3 -> Mask Detection + Tracking
 
 ## Authenticate to Google before sending requests (Linux):
     export GOOGLE_APPLICATION_CREDENTIALS="path_to_your_credentials.json"
 
-## AutoML models
-  
+## AutoML models (us-central1)
   ### For Vision
     projectId = 513991189750
     modelId = IOD6802542101608267776
