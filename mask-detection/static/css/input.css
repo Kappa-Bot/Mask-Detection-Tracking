@@ -1,0 +1,6 @@
+.custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 12px 24px;
+    cursor: pointer;
+}
