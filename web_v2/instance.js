@@ -29,7 +29,6 @@ Vue.component('mask-live', {
     this.img.height = c.height;
     tf.automl.loadObjectDetection('model.json').then(mdl => {
       this.model = mdl;
-      console.log(this.model);
     }).catch(console.log);
   },
   methods: {
@@ -37,7 +36,6 @@ Vue.component('mask-live', {
         this.img.src = data_uri;
         this.model.detect(this.img, {score: 0.4, iou: 0.5, topk: 20}).then(predictions => {
           this.predictionOut = []
-          console.log(this.predictionOut);
           predictions.forEach(obj => {
             this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
             let gradient = this.vueCanvas.createLinearGradient(0, 0, this.width, 0);
@@ -53,7 +51,7 @@ Vue.component('mask-live', {
         this.pollingId = setInterval(() => {
           this.vueCanvas.clearRect(0, 0, this.width, this.height);
           Webcam.snap(this.predict);
-        }, 10);
+        }, 100);
     },
     stop: function () {
         clearInterval(this.pollingId);
@@ -65,8 +63,8 @@ Vue.component('mask-live', {
     <button v-on:click="stop()">Stop Evaluating</button> <br/>
   <div style="display:inline-block">
     <div>
-      <div id="cam" style="position: absolute"></div>
-      <canvas id="draw" width="640" height="480" style="border:2px solid black; position:absolute"></canvas>
+      <div id="cam" style="position: absolute; z-index: -1;"></div>
+      <canvas id="draw" width="640" height="480" style="z-index: 1; border:2px solid black;"></canvas>
     </div>
     <div style="font-size:32px">
       <ul>
@@ -117,23 +115,30 @@ Vue.component('mask-photo', {
       if (FileReader && files && files.length) {
           var fr = new FileReader();
           fr.onload = () => {
+            var img = new Image;
+            img.onload = () => {
               this.outImage = document.createElement('img');
-              this.outImage.style = "z-index: -1; position: absolute;";
-              this.outImage.src = fr.result;
-              this.outImage.width = 640;
+              this.outImage.style = "z-index: -1; position: absolute; max-height: 1080px; max-width: 1280px";
+              this.outImage.src = img.src;
+              this.outImage.width = img.width;
+              this.outImage.height = img.height;
+
+              console.log(img.width, img.height);
 
               this.outCanvas = document.createElement('canvas');
+              this.outCanvas.style= "z-index: 1;";
               this.outCanvas.width = this.outImage.width;
               this.outCanvas.height = this.outImage.height;
-              this.outCanvas.style= "z-index: 1; position:absolute";
 
               this.canvasContext = this.outCanvas.getContext("2d");
               this.canvasContext.lineWidth = 4;
               this.canvasContext.font = "24px Verdana";
 
-              document.getElementById("prediction").style = "font-size:32px; position: relative; padding-top: " + this.outImage.height + "px";
+              document.getElementById("prediction").style = "font-size:32px; position: relative;";
               this.predict();
-          }
+            };
+            img.src = fr.result;
+          };
           fr.readAsDataURL(files[0]);
       }
     },
@@ -202,10 +207,12 @@ Vue.component('mask-video', {
             this.outVideo.src = fr.result;
             this.outVideo.width = 640;
 
+            console.log(fr.result);
+
             this.outCanvas = document.createElement('canvas');
             this.outCanvas.width = this.outVideo.width;
             this.outCanvas.height = this.outVideo.height;
-            this.outCanvas.style= "z-index: 1; position:absolute";
+            this.outCanvas.style= "position:absolute";
 
             this.canvasContext = this.outCanvas.getContext("2d");
             this.canvasContext.lineWidth = 4;
