@@ -12,8 +12,8 @@ Vue.component('mask-live', {
   },
   mounted: function() {
     Webcam.set({
-      width:        640,
-      height:       480,
+      width: 640,
+      height: 480,
       image_format: 'jpeg',
       jpeg_quality: '40'
     });
@@ -27,50 +27,50 @@ Vue.component('mask-live', {
     this.img = document.createElement('img');
     this.img.width = c.width;
     this.img.height = c.height;
-    tf.automl.loadObjectDetection('model.json').then(mdl => {
+    tf.automl.loadObjectDetection('/static/model.json').then(mdl => {
       this.model = mdl;
     }).catch(console.log);
-  },
+    },
   methods: {
-    predict: function(data_uri) {
-        this.img.src = data_uri;
-        this.model.detect(this.img, {score: 0.4, iou: 0.5, topk: 20}).then(predictions => {
-          this.predictionOut = []
-          predictions.forEach(obj => {
-            this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
-            let gradient = this.vueCanvas.createLinearGradient(0, 0, this.width, 0);
-            gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
-            this.vueCanvas.strokeStyle = gradient;
-            this.vueCanvas.strokeText(obj.label == "mask" ? "Mask" : "Not Mask", obj.box.left - 8, obj.box.top - 4);
-            this.vueCanvas.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
-            this.vueCanvas.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
-          });
-        }).catch(() => { this.predictionOut = "Loading ..." });
-    },
-    init: function() {
-        this.pollingId = setInterval(() => {
-          this.vueCanvas.clearRect(0, 0, this.width, this.height);
-          Webcam.snap(this.predict);
-        }, 100);
-    },
-    stop: function () {
-        clearInterval(this.pollingId);
-        setTimeout(() => this.vueCanvas.clearRect(0, 0, this.width, this.height), 1000);
-    },
+  predict: function(data_uri) {
+    this.img.src = data_uri;
+    this.model.detect(this.img, {score: 0.4, iou: 0.5, topk: 20}).then(predictions => {
+      this.predictionOut = []
+      predictions.forEach(obj => {
+      this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
+      let gradient = this.vueCanvas.createLinearGradient(0, 0, this.width, 0);
+      gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
+      this.vueCanvas.strokeStyle = gradient;
+      this.vueCanvas.strokeText(obj.label == "mask" ? "Mask" : "Not Mask", obj.box.left - 8, obj.box.top - 4);
+      this.vueCanvas.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
+      this.vueCanvas.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
+      });
+    }).catch(() => { this.predictionOut = "Loading ..." });
+  },
+  init: function() {
+    this.pollingId = setInterval(() => {
+      this.vueCanvas.clearRect(0, 0, this.width, this.height);
+      Webcam.snap(this.predict);
+    }, 100);
+  },
+  stop: function () {
+    clearInterval(this.pollingId);
+    setTimeout(() => this.vueCanvas.clearRect(0, 0, this.width, this.height), 1000);
+  },
   },
   template: `<div>
-    <button v-on:click="init()">Evaluate Live WebCam</button>
-    <button v-on:click="stop()">Stop Evaluating</button> <br/>
+  <button v-on:click="init()">Evaluate Live WebCam</button>
+  <button v-on:click="stop()">Stop Evaluating</button> <br/>
   <div style="display:inline-block">
-    <div>
-      <div id="cam" style="position: absolute; z-index: -1;"></div>
-      <canvas id="draw" width="640" height="480" style="z-index: 1; border:2px solid black;"></canvas>
-    </div>
-    <div style="font-size:32px">
-      <ul>
-        <li v-for="prediction in predictionOut">{{prediction}}</li>
-      <ul/>
-    </div>
+  <div>
+    <div id="cam" style="position: absolute; z-index: -1;"></div>
+    <canvas id="draw" width="640" height="480" style="z-index: 1; border:2px solid black;"></canvas>
+  </div>
+  <div style="font-size:32px">
+    <ul>
+    <li v-for="prediction in predictionOut">{{prediction}}</li>
+    <ul/>
+  </div>
   <div>
   </div>`
 })
@@ -81,77 +81,77 @@ Vue.component('mask-live', {
 
 Vue.component('mask-photo', {
   data: function() {
-    return {
-      outImage: null,
-      outCanvas: null,
-      canvasContext: null,
-      predictionOut: null,
-    };
+  return {
+    outImage: null,
+    outCanvas: null,
+    canvasContext: null,
+    predictionOut: null,
+  };
   },
   mounted: function() {
   },
   methods: {
-    predict: function() {
-      document.getElementById("uploadImg").remove();
-      document.getElementById("thatcontainer").appendChild(this.outImage);
-      document.getElementById("thatcontainer").appendChild(this.outCanvas);
-      tf.automl.loadObjectDetection('model.json').then(model => {
-        model.detect(this.outImage, { score: 0.2, iou: 0.5, topk: 30 }).then((predictions) => {
-        this.predictionOut = [];
-        predictions.forEach(obj => {
-          this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
-          let gradient = this.canvasContext.createLinearGradient(0, 0, this.outCanvas.width, 0);
-          gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
-          this.canvasContext.strokeStyle = gradient;
-          this.canvasContext.strokeText(obj.label == "mask" ? "Mask" : "Not Mask", obj.box.left - 8, obj.box.top - 4);
-          this.canvasContext.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
-          this.canvasContext.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
-        });
-      })}).catch(console.log);
-    },
-    go: function(evt) {
-      var tgt = evt.target || window.event.srcElement,
-          files = tgt.files;
-      if (FileReader && files && files.length) {
-          var fr = new FileReader();
-          fr.onload = () => {
-            var img = new Image;
-            img.onload = () => {
-              this.outImage = document.createElement('img');
-              this.outImage.style = "z-index: -1; position: absolute; max-height: 1080px; max-width: 1280px";
-              this.outImage.src = img.src;
-              this.outImage.width = img.width;
-              this.outImage.height = img.height;
+  predict: function() {
+    document.getElementById("uploadImg").remove();
+    document.getElementById("thatcontainer").appendChild(this.outImage);
+    document.getElementById("thatcontainer").appendChild(this.outCanvas);
+    tf.automl.loadObjectDetection('/static/model.json').then(model => {
+    model.detect(this.outImage, { score: 0.2, iou: 0.5, topk: 30 }).then((predictions) => {
+    this.predictionOut = [];
+    predictions.forEach(obj => {
+      this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
+      let gradient = this.canvasContext.createLinearGradient(0, 0, this.outCanvas.width, 0);
+      gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
+      this.canvasContext.strokeStyle = gradient;
+      this.canvasContext.strokeText(obj.label == "mask" ? "Mask" : "Not Mask", obj.box.left - 8, obj.box.top - 4);
+      this.canvasContext.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
+      this.canvasContext.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
+    });
+    })}).catch(console.log);
+  },
+  go: function(evt) {
+    var tgt = evt.target || window.event.srcElement,
+      files = tgt.files;
+    if (FileReader && files && files.length) {
+      var fr = new FileReader();
+      fr.onload = () => {
+      var img = new Image;
+      img.onload = () => {
+        this.outImage = document.createElement('img');
+        this.outImage.style = "z-index: -1; position: absolute; max-height: 1080px; max-width: 1280px";
+        this.outImage.src = img.src;
+        this.outImage.width = img.width;
+        this.outImage.height = img.height;
 
-              console.log(img.width, img.height);
+        console.log(img.width, img.height);
 
-              this.outCanvas = document.createElement('canvas');
-              this.outCanvas.style= "z-index: 1;";
-              this.outCanvas.width = this.outImage.width;
-              this.outCanvas.height = this.outImage.height;
+        this.outCanvas = document.createElement('canvas');
+        this.outCanvas.style= "z-index: 1;";
+        this.outCanvas.width = this.outImage.width;
+        this.outCanvas.height = this.outImage.height;
 
-              this.canvasContext = this.outCanvas.getContext("2d");
-              this.canvasContext.lineWidth = 4;
-              this.canvasContext.font = "24px Verdana";
+        this.canvasContext = this.outCanvas.getContext("2d");
+        this.canvasContext.lineWidth = 4;
+        this.canvasContext.font = "24px Verdana";
 
-              document.getElementById("prediction").style = "font-size:32px; position: relative;";
-              this.predict();
-            };
-            img.src = fr.result;
-          };
-          fr.readAsDataURL(files[0]);
-      }
-    },
+        document.getElementById("prediction").style = "font-size:32px; position: relative;";
+        this.predict();
+      };
+      img.src = fr.result;
+      };
+      fr.readAsDataURL(files[0]);
+    }
+  },
   },
   template: `<div>
-    <div id="thatcontainer" style="position:relative;">
-      <input type="file" id="uploadImg" crossorigin="anonymous" v-on:change="go($event)">
-    </div>
-    <div id="prediction">
-      <ul>
-        <li v-for="prediction in predictionOut">{{prediction}}</li>
-      <ul/>
-    </div>
+  <div id="thatcontainer" style="position:relative;">
+    <input type="file" id="uploadImg" crossorigin="anonymous" v-on:change="go($event)">
+  </div>
+  <div id="prediction">
+    <ul>
+    <li v-for="prediction in predictionOut">{{prediction}}</li>
+    <ul/>
+  </div>
   </nav>`
 });
 
@@ -167,76 +167,137 @@ Vue.component('mask-video', {
       outCanvas: null,
       canvasContext: null,
       predictionOut: null,
+      videoGhost: null,
     };
   },
   mounted: function() {
-    tf.automl.loadObjectDetection('static/model.json').then(model => {
-      this.model = model;
-    }).catch(console.log);
   },
   methods: {
-    predict: function() {
-      document.getElementById("uploadVid").remove();
-      document.getElementById("thatcontainer").appendChild(this.outVideo);
-        this.model.detect(this.outImage, { score: 0.2, iou: 0.5, topk: 30 }).then((predictions) => {
-        this.predictionOut = [];
-        console.log(predictions);
-        /*predictions.forEach(obj => {
-          setTimeout(() => {
-            this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
-            let gradient = this.canvasContext.createLinearGradient(0, 0, this.outCanvas.width, 0);
-            gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
-            this.canvasContext.strokeStyle = gradient;
-            this.canvasContext.clearRect(0, 0, this.outCanvas.width, this.outCanvas.height);
-            this.canvasContext.strokeText(obj.label == "mask" ? "Mask" : "Not Mask", obj.box.left - 8, obj.box.top - 4);
-            this.canvasContext.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
-            this.canvasContext.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
-          }, obj.startTimeOffset.seconds);
-        });*/
-        this.outVideo.autoplay = true;
-      }).catch(console.log);
-    },
     go: function(evt) {
-      var tgt = evt.target || window.event.srcElement,
-          files = tgt.files;
-      if (FileReader && files && files.length) {
-          var fr = new FileReader();
-          fr.onload = () => {
-            this.outVideo = document.createElement('video');
-            this.outVideo.style = "z-index: -1; position: absolute;";
-            this.outVideo.src = fr.result;
-            this.outVideo.width = 640;
+      tf.automl.loadObjectDetection('static/model.json').then(model => {
+        var videoGhost = document.createElement('video');
 
-            console.log(fr.result);
+        var array = [];
+        var newArr = [];
 
-            this.outCanvas = document.createElement('canvas');
-            this.outCanvas.width = this.outVideo.width;
-            this.outCanvas.height = this.outVideo.height;
-            this.outCanvas.style= "position:absolute";
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+        document.getElementById("thatcontainer").appendChild(canvas);
+        canvas.style = "border:2px solid black; position:fixed; z-index: -1; line-width: 64px; font: 96px Verdana;";
+      	ctx.lineWidth = 64;
+      	ctx.font = "96px Verdana";
 
-            this.canvasContext = this.outCanvas.getContext("2d");
-            this.canvasContext.lineWidth = 4;
-            this.canvasContext.font = "24px Verdana";
+        var pro = document.querySelector('#progress');
+      	var outimg = document.createElement('img');
 
-            document.getElementById("prediction").style = "font-size:32px; position: relative; padding-top: " + this.outVideo.height + "px";
+        var initVideo = function(e) {
+          console.log(this.videoWidth, this.videoHeight);
+          canvas.width = this.videoWidth;
+          canvas.height = this.videoHeight;
+          outimg.width = this.videoWidth;
+          outimg.height = this.videoHeight;
+        }
+        var captureFrame = function(e) {
+          videoGhost.pause();
+          ctx.drawImage(videoGhost, 0, 0);
+          array.push({
+            blob: canvas.toDataURL("image/png"),
+            timeOffset: videoGhost.currentTime,
+          });
+          pro.innerHTML = ((videoGhost.currentTime / videoGhost.duration) * 100).toFixed(2) + ' %';
+          if (videoGhost.currentTime < videoGhost.duration)
+            videoGhost.play();
+        }
+        var lastStep = function(e) {
+          console.log(this.model);
+          document.getElementById("vidInput").remove();
+          document.getElementById("progress").remove();
 
-              this.predict();
-          }
-          fr.readAsDataURL(files[0]);
-      }
+          console.log(array.length);
+          array.forEach((item, idx) => {
+            if (idx > 0 && item.timeOffset !== array[idx - 1].timeOffset)
+                newArr.push(item);
+          });
+          delete array;
+          console.log(newArr.length);
+
+            var count = 0;
+            for (let i = 0; i < newArr.length; i++) {
+              let img = document.createElement('img');
+              img.src = newArr[i].blob;
+              img.onload = function(e) {
+                model.detect(img, { score: 0.15, iou: 0.6, topk: 50 }).then((predictions) => {
+                  count++;
+                  URL.revokeObjectURL(this.src);
+                  newArr[i].preds = predictions;
+                  if (count == newArr.length) finalGo();
+                });
+              };
+            }
+            URL.revokeObjectURL(this.src);
+        }
+        var finalGo = function() {
+            videoGhost.removeEventListener("loadedmetadata", initVideo, false);
+            videoGhost.removeEventListener("loadedmetadata", initVideo, true);
+            videoGhost.removeEventListener("timeupdate", captureFrame, false);
+            videoGhost.removeEventListener("timeupdate", captureFrame, true);
+            videoGhost.removeEventListener("ended", lastStep, false);
+            videoGhost.removeEventListener("ended", lastStep, true);
+
+            videoGhost.addEventListener('ended', function (e) { delete newArr; }, false);
+
+            for (let i = 0; i < newArr.length; i++) {
+              setTimeout(() => {
+                ctx.drawImage(videoGhost, 0, 0);
+                if (newArr[i].preds !== []) {
+                  videoGhost.pause();
+                  this.predictionOut = [];
+                  console.log(`${newArr[i].preds.length} predictions at ${newArr[i].timeOffset * 1000}`);
+                  newArr[i].preds.forEach(obj => {
+                    this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
+                    let gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+                    gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
+                    ctx.strokeStyle = gradient;
+                    ctx.strokeText(obj.label == "mask" ? "Mask" : "NoMask", obj.box.left - 8, obj.box.top - 4);
+                    ctx.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
+                    ctx.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
+                  });
+                  videoGhost.play();
+                }
+              }, newArr[i].timeOffset * 1000);
+            }
+
+            console.log(`Found ${newArr.length} predictions!`);
+            videoGhost.pause();
+            videoGhost.currentTime = 0;
+            videoGhost.play();
+        }
+
+
+        videoGhost.addEventListener('loadedmetadata', initVideo, false);
+        videoGhost.addEventListener('timeupdate', captureFrame, false);
+        videoGhost.addEventListener('ended', lastStep, false);
+
+        videoGhost.muted = true;
+        videoGhost.src = URL.createObjectURL(document.getElementById("vidInput").files[0]);
+      	videoGhost.play();
+      });
     },
   },
   template: `<div style="display: block">
     <div id="thatcontainer" class="container">
-      <input type="file" id="uploadVid" crossorigin="anonymous" v-on:change="go($event)">
+      <input id="vidInput" type="file" accept="video/*" v-on:change="go()"/>
     </div>
     <div id="prediction" style="font-size:32px; position: relative; padding-top: 300px">
+      <p id="progress"></p>
       <ul>
         <li v-for="prediction in predictionOut">{{prediction}}</li>
       <ul/>
     </div>
   </div>`
 });
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,41 +306,41 @@ Vue.component('mask-video', {
 var options = {
   el: "#app",
   data: {
-    buff: "Hello World!",
-    photo: false,
-    live: false,
-    video: false,
+  buff: "Hello World!",
+  photo: false,
+  live: false,
+  video: false,
   },
   methods: {
-    resetDisplay() {
-      this.photo = false;
-      this.live = false;
-      this.video = false;
-    },
-    goPhoto() {
-      this.resetDisplay();
-      this.photo = true;
-    },
-    goLive() {
-      this.resetDisplay();
-      this.live = true;
-    },
-    goVideo() {
-      this.resetDisplay();
-      this.video = true;
-    },
+  resetDisplay() {
+    this.photo = false;
+    this.live = false;
+    this.video = false;
+  },
+  goPhoto() {
+    this.resetDisplay();
+    this.photo = true;
+  },
+  goLive() {
+    this.resetDisplay();
+    this.live = true;
+  },
+  goVideo() {
+    this.resetDisplay();
+    this.video = true;
+  },
   },
   template: `<div class="main clearfix">
-    <div class="column" style="float: left">
-      <p><button v-on:click="goPhoto()">Detect on a Picture</button></p>
-      <p><button v-on:click="goLive()">Track on your live WebCam</button></p>
-      <p><button v-on:click="goVideo()">Track on a Video</button></p>
-    </div>
-    <div class="column" style:float:right>
-      <mask-photo v-if="photo"></mask-photo>
-      <mask-live v-if="live"></mask-live>
-      <mask-video v-if="video"></mask-video>
-    </div>
+  <div class="column" style="float: left">
+    <p><button v-on:click="goPhoto()">Detect on a Picture</button></p>
+    <p><button v-on:click="goLive()">Track on your live WebCam</button></p>
+    <p><button v-on:click="goVideo()">Track on a Video</button></p>
+  </div>
+  <div class="column" style:float:right>
+    <mask-photo v-if="photo"></mask-photo>
+    <mask-live v-if="live"></mask-live>
+    <mask-video v-if="video"></mask-video>
+  </div>
   </div>`
 }
 var vm = new Vue(options);

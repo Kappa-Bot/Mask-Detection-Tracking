@@ -1,16 +1,34 @@
 <!DOCTYPE html>
-<html>
-<head>
-	<script src="https://unpkg.com/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
-	<script src="https://unpkg.com/@tensorflow/tfjs-automl@1.0.0/dist/tf-automl.min.js"></script>
-</head
-<title>Login</title>
-<body>
-	<input id="vidInput" type="file" accept="video/*"/>
-	<p id="progress"></p>
-</body>
-<meta charset="UTF-8" />
-<script>
-document.getElementById('vidInput').addEventListener('change', extractFrames, false);
-</script>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title>MaskTracker</title>
+		<link rel="stylesheet" type="text/css" href="css/demo.css"/>
+		<link rel="stylesheet" type="text/css" href="css/normalize.css"/>
+		<link rel="stylesheet" type="text/css" href="css/component.css"/>
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<script src="https://unpkg.com/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
+		<script src="https://unpkg.com/@tensorflow/tfjs-automl@1.0.0/dist/tf-automl.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	</head>
+	<body>
+		<div id="perspective" class="perspective effect-airbnb">
+			<div class="container">
+				<div class="wrapper">
+					<header class="codrops-header">
+						<h1><a href="index.html" class="titol">MASK DETECTION</a> <span>A Covid-19 Initiative</span></h1>
+					</header>
+					<hr/>
+					<div id="app" class="main clearfix">
+					</div>
+					<div class="related">
+						<p>If you enjoyed this project you might also like:</p>
+						<p><a href="https://prod-dot-ejemplo-247714.uc.r.appspot.com/">HACKATHON ENG. UAB</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script src="instance.js" charset="utf-8"></script>
 </html>
