@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title>MaskTracker</title>
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='demo.css') }}"/>
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<script src="https://unpkg.com/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
+		<script src="https://unpkg.com/@tensorflow/tfjs-automl@1.0.0/dist/tf-automl.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	</head>
+	<body>
+		<div id="perspective" class="perspective effect-airbnb">
+			<div class="container">
+				<div class="wrapper">
+					<header class="codrops-header" style="border-bottom: 1px solid #9A9A9A">
+						<h1><a href="#" class="titol">MASK DETECTION</a><span>A Covid-19 Initiative</span></h1>
+						<div style="text-align: justify; text-justify: inter-word; line-height : 30px">L'aplicació web desenvolupada es focalitza en detectar si les persones porten o no mascareta de seguretat en funció d'un input ingresat per l'usauari. Inicialment es planteja 
+			com una eina que pugui servir de suport en l'aplicació de la nova legislació que regula l'ús de mascaretes a Espanya. El Butlletí Oficial de l'Estat (BOE) ha fet públic el 20 de maig de 2020 la nova ordre del Ministeri de Sanitat que regula l'ús generalitzat de mascaretes en la via pública, en espais lliures o qualsevol lloc tancat d'ús públic o que es trobi obert al públic sempre i quan no es pugui respectar la distància de seguretat interpersonal. Aquest projecte, busca regularitzar el control d’aquest decret, en la mesura del possible, utilitzant els recursos proporcionats per Google Cloud Platform.</div><br/>
+						<div><p style="font-weight: bolder">NOTE:</p> Màxima duració del video a processar: 30s</div>
+					</header>
+					<div id="app" class="main clearfix">
+					</div>
+					<div class="container" style="display: grid; grid-template-columns: auto auto auto; padding: 10px; border-top: 1px solid #9A9A9A">
+						<div class="grid"><p style="font-weight: bolder">Useful links: </p></div>
+						<div class="grid"><p style="font-weight: bolder">Developed By: </p><p>Felipe, Edgar & Clavell, Pol & Felip, Joel</p></div>
+						<div class="grid"><p style="font-weight: bolder">Follow Us on:</p></div>
+						<div class="grid"><a><a href="https://cloud.google.com/">Google Cloud Platform</a></div>
+						<div class="grid"><p style="font-weight: bolder">Contact Us: </p><p><a>hackathon-mask-detection@uab.cat</a></p></div>
+						<div class="grid"><a>Facebook</a></div>
+						<div class="grid"><a href="https://prod-dot-ejemplo-247714.uc.r.appspot.com/">Hackathon Eng. UAB</a></div>
+						<div class="grid"><p style="font-weight: bolder">Hackathon-3&copy - 28/05/2020</p></div>
+						<div class="grid"><a>Instagram</a></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script src="{{ url_for('static', filename='javas/instance.js') }}" charset="utf-8"></script>
+</html>
