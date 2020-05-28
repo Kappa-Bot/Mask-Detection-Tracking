@@ -239,6 +239,7 @@ Vue.component('mask-video', {
               img.onload = function(e) {
                 pro.innerHTML = "Tracked " + ((newArr[i].timeOffset / duration) * 100).toFixed(2) + ' %';
                 model.detect(img, { score: 0.15, iou: 0.6, topk: 50 }).then((predictions) => {
+                  delete newArr[i].blob;
                   count++;
                   URL.revokeObjectURL(this.src);
                   newArr[i].preds = predictions;
@@ -246,6 +247,16 @@ Vue.component('mask-video', {
                     document.getElementById("progress").remove();
                     document.getElementById("prediction").remove();
                     document.getElementById("thatcontainer").appendChild(canvas);
+
+                    videoGhost.removeEventListener("loadedmetadata", initVideo, false);
+                    videoGhost.removeEventListener("loadedmetadata", initVideo, true);
+                    videoGhost.removeEventListener("timeupdate", captureFrame, false);
+                    videoGhost.removeEventListener("timeupdate", captureFrame, true);
+                    videoGhost.removeEventListener("ended", lastStep, false);
+                    videoGhost.removeEventListener("ended", lastStep, true);
+
+                    videoGhost.addEventListener('ended', function (e) { finalGo() }, false);
+
                     finalGo();
                   }
                 });
@@ -254,15 +265,6 @@ Vue.component('mask-video', {
             URL.revokeObjectURL(this.src);
         }
         var finalGo = function() {
-            videoGhost.removeEventListener("loadedmetadata", initVideo, false);
-            videoGhost.removeEventListener("loadedmetadata", initVideo, true);
-            videoGhost.removeEventListener("timeupdate", captureFrame, false);
-            videoGhost.removeEventListener("timeupdate", captureFrame, true);
-            videoGhost.removeEventListener("ended", lastStep, false);
-            videoGhost.removeEventListener("ended", lastStep, true);
-
-            videoGhost.addEventListener('ended', function (e) { finalGo() }, false);
-
             for (let i = 0; i < newArr.length; i++) {
               setTimeout(() => {
                 //ctx.drawImage(videoGhost, 0, 0);
