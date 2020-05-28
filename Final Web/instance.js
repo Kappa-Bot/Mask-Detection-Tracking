@@ -180,57 +180,74 @@ Vue.component('mask-video', {
         var array = [];
         var newArr = [];
 
+
         var canvas = document.createElement('canvas');
         var ctx = canvas.getContext('2d');
-        document.getElementById("thatcontainer").appendChild(canvas);
         canvas.style = "border:2px solid black; position:fixed; z-index: -1; line-width: 64px; font: 96px Verdana;";
       	ctx.lineWidth = 64;
       	ctx.font = "96px Verdana";
 
+        var auxcvs = document.createElement('canvas')
+        var auxctx = auxcvs.getContext('2d');
+        auxcvs.style = "border:2px solid black; position:fixed; z-index: -1; line-width: 64px; font: 96px Verdana;";
+      	auxctx.lineWidth = 64;
+      	auxctx.font = "96px Verdana";
+
+
         var pro = document.querySelector('#progress');
-      	var outimg = document.createElement('img');
+
+        var duration;
 
         var initVideo = function(e) {
-          console.log(this.videoWidth, this.videoHeight);
-          canvas.width = this.videoWidth;
-          canvas.height = this.videoHeight;
-          outimg.width = this.videoWidth;
-          outimg.height = this.videoHeight;
+          canvas.width =  640;//this.videoWidth;
+          auxcvs.width =  640;//this.videoWidth;
+          canvas.height = 480;//this.videoHeight;
+          auxcvs.height = 480;//this.videoHeight;
+
+          duration = videoGhost.duration;
+          document.getElementById("vidInput").remove();
+          console.log(videoGhost.width, videoGhost.height, videoGhost.videoWidth, videoGhost.videoHeight);
         }
+
         var captureFrame = function(e) {
           videoGhost.pause();
-          ctx.drawImage(videoGhost, 0, 0);
+          //auxctx.drawImage(videoGhost, 0, 0);
+          auxctx.drawImage(videoGhost, 0, 0, videoGhost.videoWidth, videoGhost.videoHeight, 0, 0, 640, 480);
+
           array.push({
-            blob: canvas.toDataURL("image/png"),
+            blob: auxcvs.toDataURL("image/png"),
             timeOffset: videoGhost.currentTime,
           });
-          pro.innerHTML = ((videoGhost.currentTime / videoGhost.duration) * 100).toFixed(2) + ' %';
+          pro.innerHTML = "Loaded " + ((videoGhost.currentTime / duration) * 100).toFixed(2) + ' %';
+
           if (videoGhost.currentTime < videoGhost.duration)
             videoGhost.play();
         }
         var lastStep = function(e) {
-          console.log(this.model);
-          document.getElementById("vidInput").remove();
-          document.getElementById("progress").remove();
-
-          console.log(array.length);
+          //console.log(array.length);
           array.forEach((item, idx) => {
             if (idx > 0 && item.timeOffset !== array[idx - 1].timeOffset)
                 newArr.push(item);
           });
+          console.log(`Compressed ${array.length} frames to ${newArr.length}`);
           delete array;
-          console.log(newArr.length);
 
             var count = 0;
             for (let i = 0; i < newArr.length; i++) {
               let img = document.createElement('img');
               img.src = newArr[i].blob;
               img.onload = function(e) {
+                pro.innerHTML = "Tracked " + ((newArr[i].timeOffset / duration) * 100).toFixed(2) + ' %';
                 model.detect(img, { score: 0.15, iou: 0.6, topk: 50 }).then((predictions) => {
                   count++;
                   URL.revokeObjectURL(this.src);
                   newArr[i].preds = predictions;
-                  if (count == newArr.length) finalGo();
+                  if (count == newArr.length) {
+                    document.getElementById("progress").remove();
+                    document.getElementById("prediction").remove();
+                    document.getElementById("thatcontainer").appendChild(canvas);
+                    finalGo();
+                  }
                 });
               };
             }
@@ -244,17 +261,15 @@ Vue.component('mask-video', {
             videoGhost.removeEventListener("ended", lastStep, false);
             videoGhost.removeEventListener("ended", lastStep, true);
 
-            videoGhost.addEventListener('ended', function (e) { delete newArr; }, false);
+            videoGhost.addEventListener('ended', function (e) { finalGo() }, false);
 
             for (let i = 0; i < newArr.length; i++) {
               setTimeout(() => {
-                ctx.drawImage(videoGhost, 0, 0);
+                //ctx.drawImage(videoGhost, 0, 0);
+                ctx.drawImage(videoGhost, 0, 0, videoGhost.videoWidth, videoGhost.videoHeight, 0, 0, 640, 480);
                 if (newArr[i].preds !== []) {
                   videoGhost.pause();
-                  this.predictionOut = [];
-                  console.log(`${newArr[i].preds.length} predictions at ${newArr[i].timeOffset * 1000}`);
-                  newArr[i].preds.forEach(obj => {
-                    this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
+                  newArr[i].preds.forEach((obj) => {
                     let gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
                     gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
                     ctx.strokeStyle = gradient;
@@ -267,12 +282,11 @@ Vue.component('mask-video', {
               }, newArr[i].timeOffset * 1000);
             }
 
-            console.log(`Found ${newArr.length} predictions!`);
+            console.log(`Found ${newArr.length} tracks!`);
             videoGhost.pause();
             videoGhost.currentTime = 0;
             videoGhost.play();
         }
-
 
         videoGhost.addEventListener('loadedmetadata', initVideo, false);
         videoGhost.addEventListener('timeupdate', captureFrame, false);
@@ -285,14 +299,11 @@ Vue.component('mask-video', {
     },
   },
   template: `<div style="display: block">
+    <div id="prediction" style="font-size:32px; position: relative;">
+      <p id="progress"></p>
+    </div>
     <div id="thatcontainer" class="container">
       <input id="vidInput" type="file" accept="video/*" v-on:change="go()"/>
-    </div>
-    <div id="prediction" style="font-size:32px; position: relative; padding-top: 300px">
-      <p id="progress"></p>
-      <ul>
-        <li v-for="prediction in predictionOut">{{prediction}}</li>
-      <ul/>
     </div>
   </div>`
 });
