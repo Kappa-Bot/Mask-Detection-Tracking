@@ -174,7 +174,7 @@ Vue.component('mask-video', {
   },
   methods: {
     go: function(evt) {
-      tf.automl.loadObjectDetection('static/model.json').then(model => {
+      tf.automl.loadObjectDetection('/static/model.json').then(model => {
         var videoGhost = document.createElement('video');
 
         var array = [];
@@ -183,13 +183,13 @@ Vue.component('mask-video', {
 
         var canvas = document.createElement('canvas');
         var ctx = canvas.getContext('2d');
-        canvas.style = "border:2px solid black; position:fixed; z-index: -1; line-width: 64px; font: 96px Verdana;";
+        canvas.style = "border:2px solid black; position:relative; z-index: -1; line-width: 64px; font: 96px Verdana;";
       	ctx.lineWidth = 64;
       	ctx.font = "96px Verdana";
 
         var auxcvs = document.createElement('canvas')
         var auxctx = auxcvs.getContext('2d');
-        auxcvs.style = "border:2px solid black; position:fixed; z-index: -1; line-width: 64px; font: 96px Verdana;";
+        auxcvs.style = "border:2px solid black; position:relative; z-index: -1; line-width: 64px; font: 96px Verdana;";
       	auxctx.lineWidth = 64;
       	auxctx.font = "96px Verdana";
 
@@ -197,6 +197,9 @@ Vue.component('mask-video', {
         var pro = document.querySelector('#progress');
 
         var duration;
+        var thatFlag = false;
+
+        var playBttn = document.createElement("button");
 
         var initVideo = function(e) {
           canvas.width =  640;//this.videoWidth;
@@ -246,6 +249,7 @@ Vue.component('mask-video', {
                   if (count == newArr.length) {
                     document.getElementById("progress").remove();
                     document.getElementById("prediction").remove();
+                    document.getElementById("thatcontainer").appendChild(playBttn);
                     document.getElementById("thatcontainer").appendChild(canvas);
 
                     videoGhost.removeEventListener("loadedmetadata", initVideo, false);
@@ -255,9 +259,22 @@ Vue.component('mask-video', {
                     videoGhost.removeEventListener("ended", lastStep, false);
                     videoGhost.removeEventListener("ended", lastStep, true);
 
-                    videoGhost.addEventListener('ended', function (e) { finalGo() }, false);
+                    videoGhost.addEventListener('ended', function (e) { thatFlag = false; }, false);
 
-                    finalGo();
+                    videoGhost.pause();
+                    videoGhost.currentTime = 0;
+                    ctx.drawImage(videoGhost, 0, 0, videoGhost.videoWidth, videoGhost.videoHeight, 0, 0, 640, 480);
+
+                    playBttn.onclick = function() {
+                      if (!thatFlag) {
+                        thatFlag = true;
+                        videoGhost.play();
+                        finalGo();
+                      }
+                      console.log(`${thatFlag}`);
+                    }
+                    playBttn.innerHTML = "Play"
+
                   }
                 });
               };
@@ -283,11 +300,7 @@ Vue.component('mask-video', {
                 }
               }, newArr[i].timeOffset * 1000);
             }
-
             console.log(`Found ${newArr.length} tracks!`);
-            videoGhost.pause();
-            videoGhost.currentTime = 0;
-            videoGhost.play();
         }
 
         videoGhost.addEventListener('loadedmetadata', initVideo, false);
@@ -304,7 +317,7 @@ Vue.component('mask-video', {
     <div id="prediction" style="font-size:32px; position: relative;">
       <p id="progress"></p>
     </div>
-    <div id="thatcontainer" class="container">
+    <div id="thatcontainer" class="container" style="position:relative">
       <input id="vidInput" type="file" accept="video/*" v-on:change="go()"/>
     </div>
   </div>`
@@ -344,10 +357,10 @@ var options = {
   },
   },
   template: `<div class="main clearfix">
-  <div class="column" style="float: left">
-    <p><button v-on:click="goPhoto()">Detect on a Picture</button></p>
-    <p><button v-on:click="goLive()">Track on your live WebCam</button></p>
-    <p><button v-on:click="goVideo()">Track on a Video</button></p>
+  <div class="column" style="float: left; border-right: 1px solid #9A9A9A">
+    <p><button v-on:click="goPhoto()">Detect in an Image file</button></p>
+    <p><button v-on:click="goLive()">Track in your live WebCam</button></p>
+    <p><button v-on:click="goVideo()">Track in a Video file</button></p>
   </div>
   <div class="column" style:float:right>
     <mask-photo v-if="photo"></mask-photo>
