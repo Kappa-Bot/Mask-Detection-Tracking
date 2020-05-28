@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "hackathon-mask-detection",
+  "private_key_id": "5eb9b0bd50111b272f929268f44b9553812c8bfc",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDXKl3Qk0aoLYhP\nJ/ISf1gAa30Bp9yBf5Dzri3KB7zpBDYbJLahKs6q+4wpfSTykFUq6bYqjMpkryPd\n8QIJnL65SZ68sSO/+hOvgEKwg/jJWxFoOYloRsL3CRdSHpvAouN/hCcg83tRqQjY\nSbZGh8p7mtW5g4YfDSv4+w7CbU7sDSTkmwtOc+DWb9ymNixBqUQxPR9WbmOmHnlj\nsYBrCJhJ5Ny8FiBi46SqyfFKR/Q0eBSBG4wbBGpQgbXkpXJpHodoUQ5OcQ5+NwWr\n7l/zfHdVVNvbQ1aOgOKp7XEI6AbIvxnBUzGo6AVxv9dogVHferEyis+apGd6CvaH\nZkYy3T3fAgMBAAECggEAald7l3b6sGsUl/6noyHCFi8J0PQsROqN8wnOgq/xW38j\n2KV8B8q26wW5H9ZEmQfht/xbdssvyrRO90XC2opYLw5mQF8SSrMn4JD1JPWM08PJ\nJihts5ZpjJu3JXSQSRSYeLERf7Um6VSwVOmVh2Vcm1uKrw4Ejzs81OkMQeaxX3M1\nhb8vSpD0riqTWQWKTLQXpAB+g9tnC5gNbwEdR7qGOZKuSZS+FJSF4WeHC9bZatrH\nXOOZwAHZMj/fSlvUpd1T/jxrH74y5dgk0Y7Xqhy9bObHmYjMRnXucvwu9gYhDiOu\nNIbR8RegYiAgXhS/1Oi9yKBz0lPzKySzv4hbnwhH2QKBgQDxp71XaRYJb2aonfeR\n+pliKw5F9KpbpmsDYJz/zAZ1XNCdT62tFLtNibjpvp+c1uf4beNFQGlbr40785pj\nFVo/KTBFQNLnhDIACAdtWHdMD8L/i/npoqIasx6GDe6AlhslRi6WVrQrz4LIvQF1\nOlkI0zqS3YtN4txLVU+dcpsfBwKBgQDj8BTVabaq4HnYNT2HeBq8V916Xdef+u81\nKbZXWZrXYRSMl3hj/lrG9QRNGxKC+MJtCKYssDjcn0dlaQevXFmlCKZLE8OiPHPd\nNkRJcDMSk3QlrQgap7tp1l//93P1Hz5G69z+Le6+4NOfvOwCxkQ79di4XB+OpDRV\nHcB4QHFcaQKBgFk4ynKsjQNcyzV0ZYTTVrBlHzb6968xCY/MqwrSxIuugiOi2Ifw\nAJvHPqumwv3AZxNVVzUpa/z7GxVIgvcUWia5yWW4YmYya9eRH1Ti9eDybNe3UcVO\nU7Wx7pImMKnvQgSIHglJ5+nJCwucpR4oNdlJS/YPsDBIk3eI/wUt3FIfAoGAGm7M\n+7K2rDo75wbFi+AxuYW2+WnIh5TiCJg9vQN3IWLwrx0hqPbmMAxZ41cwXl/arCpE\nmwoUjgEqlmgHrB5ZhvnpzusL1NSN2ylf4eRRB+ZxoazfM7gf07Y4i8Z2fAaTgkX3\n6sII3bnU0MFn3SqA3zMzXq3QOwpvxy8cEtXmT4ECgYB3gtDaeN8UuV77OyUSicbH\nD7zEPa/wKEZLoWalPYI3ozhMOsIj3Ag/cHgbM2Lhs0Qgd/eB8xb5jaXzQv1Fiwl3\njRN/JuOfSVYZnMe3WlnGJtaR8JUZ+kC56mydGkfTLjsyCIOD+J7i3t2XwJYb8rHU\nW+LHsswhcub7p++hCd4btQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "account@hackathon-mask-detection.iam.gserviceaccount.com",
+  "client_id": "109372221731246962903",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/account%40hackathon-mask-detection.iam.gserviceaccount.com"
+}
