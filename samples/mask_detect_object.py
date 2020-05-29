@@ -50,16 +50,16 @@ def highlight_objects(image, objects, output_filename):
     im = Image.open(image)
     draw = ImageDraw.Draw(im)
 
-    # Sepecify the font-family and the font-size
     for obj in objects:
         box = [(vertex.x * im.size[0], vertex.y * im.size[1])
                for vertex in obj.bounding_poly.normalized_vertices]
+        # Draws the bounding box of the detected object
         draw.line([box[0], box[1], box[2], box[3], box[0]], width=8, fill= '#32cd32')
     im.save(output_filename)
 
 def main(input_filename, output_filename, max_results):
     with open(input_filename, 'rb') as image:
-        image.seek(0)        
+        image.seek(0)
         objects = localize_objects(input_filename)
         highlight_objects(image, objects, output_filename)
 

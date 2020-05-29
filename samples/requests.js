@@ -44,9 +44,9 @@ async function localizeObjects(fileName) {
 }
 //localizeObjects(fileName);
 
-//Meant to be the main function
+//REAL STUFF
 async function sendReq(fileName, mode) {
-  var type;
+  var type; // Chosen below the function
   switch(mode) {
     case 0:
       type = "OBJECT_LOCALIZATION";
@@ -58,7 +58,7 @@ async function sendReq(fileName, mode) {
       console.log("Excuse me what the fuck");
       break;
   }
-  const request = {
+  const request = { // Params to the HTTP request
     "requests": [{
       "image": {
         "content": Buffer.from(fs.readFileSync(fileName)).toString('base64')
@@ -70,6 +70,7 @@ async function sendReq(fileName, mode) {
     }]
   };
   var dimensions = sizeOf(fileName);
+  // Manual API Call and manual HTTP request forming
   fetch('https://vision.googleapis.com/v1/images:annotate?key=AIzaSyAp6xBe0ZvUMW6zr1AXgeao8OlhFlSVM0U', {
     method: 'POST',
     body: JSON.stringify(request),
@@ -87,8 +88,10 @@ async function sendReq(fileName, mode) {
       default:
 
     }
+    // For each objectList | faceList
     annotationsList.forEach((item, i) => {
       var vertexList;
+      // Found
       switch (mode) {
         case 0:
           console.log(`Found ${item.name} #${i + 1}` + "\n\t" + `Score: ${item.score} at`);
@@ -101,6 +104,7 @@ async function sendReq(fileName, mode) {
         default:
           console.log("Excuse me literally what the fuck");
       }
+      // Bounding boxes
       vertexList.forEach((coord, i) => {
         console.log(`\tx:${coord.x * dimensions.height}\ty:${coord.y * dimensions.width}`);
       });

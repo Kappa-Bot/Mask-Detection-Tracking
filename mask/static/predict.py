@@ -11,6 +11,7 @@ def get_prediction(content, project_id, model_id):
   name = 'projects/{}/locations/us-central1/models/{}'.format(project_id, model_id)
   payload = {'image': {'image_bytes': content }}
   params = {}
+  # Prediction to AutoML mask detector model online
   request = prediction_client.predict(name, payload, params)
   return request  # waits till request is returned
 

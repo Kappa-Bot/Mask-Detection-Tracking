@@ -1,3 +1,35 @@
+/* * * * * * * * * * * * *  * * * * * * * * * * * * *
+* * * * Vue.js Instance
+* **************************************************
+* Components:
+* * * mask-live
+* * * * * live mask tracking from the WebCam
+* * * mask-photo
+* * * * * mask detection from an uploaded file
+* * * mask-video
+* * * * * mask tracking from an uploaded video
+* **************************************************
+* Offline Edge TFjs detection = better performance
+* * * Tuning
+* * * * * Parameters can be changed to increase
+* * * * * * * precision
+* * * * * * * number of results
+* * * * * score
+* * * * * * * score threshold for detection results
+* * * * * iou
+* * * * * * * determinancy of multiple choices
+* * * * * * * of detection on a near region
+* * * * * topk
+* * * * * * * best k scored-based results
+* **************************************************
+* Of course, tuning is so expensive.
+* Best patching method is:
+* * * Use csv_image.js | csv_video.js
+* * * Can take profit or not of previous dataSets
+* * * Build a better-adapted AutoML model
+* * * Put the best on the place of the actual model
+* * * * * * * * * * * * *  * * * * * * * * * * * * */
+
 
 Vue.component('mask-live', {
   data: function() {
@@ -28,6 +60,7 @@ Vue.component('mask-live', {
     this.img = document.createElement('img');
     this.img.width = c.width;
     this.img.height = c.height;
+    // Load TensorFlowjs AutoML-offline-exported model locally
     tf.automl.loadObjectDetection('/static/model.json').then(mdl => {
       this.model = mdl;
     }).catch(console.log);
@@ -35,26 +68,41 @@ Vue.component('mask-live', {
   methods: {
   predict: function(data_uri) {
     this.img.src = data_uri;
+    ////////////////////
+    //// Prediction ////
+    ////////////////////
     this.model.detect(this.img, {score: 0.4, iou: 0.5, topk: 20}).then(predictions => {
       this.predictionOut = []
+      // For each found subject
       predictions.forEach(obj => {
-      this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
-      let gradient = this.vueCanvas.createLinearGradient(0, 0, this.width, 0);
-      gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
-      this.vueCanvas.strokeStyle = gradient;
-      this.vueCanvas.strokeText(obj.label == "mask" ? "Mask" : "Not Mask", obj.box.left - 8, obj.box.top - 4);
-      this.vueCanvas.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
-      this.vueCanvas.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
+        this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
+        let gradient = this.vueCanvas.createLinearGradient(0, 0, this.width, 0);
+        // Color of box depending on label
+        gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
+        this.vueCanvas.strokeStyle = gradient;
+        // Draw tag + score + bounds
+        this.vueCanvas.strokeText(obj.label == "mask" ? "Mask" : "Not Mask", obj.box.left - 8, obj.box.top - 4);
+        this.vueCanvas.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
+        this.vueCanvas.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
       });
-    }).catch(() => { this.predictionOut = "Loading ..." });
+    }).catch(() => { this.predictionOut = "Loading ..." });4
+    ////////////////////////
+    //// End Prediction ////
+    ////////////////////////
   },
   init: function() {
+    // WebCam loop
     this.pollingId = setInterval(() => {
+      // Clear previous boxes
       this.vueCanvas.clearRect(0, 0, this.width, this.height);
+      // SnapShot and predict + draw
       Webcam.snap(this.predict);
-    }, 100);
+    }, 100); // end setInterval
   },
   stop: function () {
+    // Stop evaluating WebCam
+    // Make sure to click this before changing functionality
+    // Otherwise, this would probably stay using CPU power
     clearInterval(this.pollingId);
     setTimeout(() => this.vueCanvas.clearRect(0, 0, this.width, this.height), 1000);
   },
@@ -92,24 +140,41 @@ Vue.component('mask-photo', {
   mounted: function() {
   },
   methods: {
+  // Called only when the new <img> element is formed
   predict: function() {
     document.getElementById("uploadImg").remove();
     document.getElementById("thatcontainer").appendChild(this.outImage);
     document.getElementById("thatcontainer").appendChild(this.outCanvas);
+    // Load TensorFlowjs AutoML-offline-exported model locally
     tf.automl.loadObjectDetection('/static/model.json').then(model => {
-    model.detect(this.outImage, { score: 0.2, iou: 0.5, topk: 30 }).then((predictions) => {
-    this.predictionOut = [];
-    predictions.forEach(obj => {
-      this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
-      let gradient = this.canvasContext.createLinearGradient(0, 0, this.outCanvas.width, 0);
-      gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
-      this.canvasContext.strokeStyle = gradient;
-      this.canvasContext.strokeText(obj.label == "mask" ? "Mask" : "Not Mask", obj.box.left - 8, obj.box.top - 4);
-      this.canvasContext.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
-      this.canvasContext.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
-    });
-    })}).catch(console.log);
+      ////////////////////
+      //// Prediction ////
+      ////////////////////
+      model.detect(this.outImage, { score: 0.2, iou: 0.5, topk: 30 }).then((predictions) => {
+        this.predictionOut = [];
+        // For each found subject
+        predictions.forEach(obj => {
+          this.predictionOut.push("| Subject | " + obj.label + " | " + obj.score.toFixed(4) + "%");
+          let gradient = this.canvasContext.createLinearGradient(0, 0, this.outCanvas.width, 0);
+          // Color of box depending on label
+          gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
+          this.canvasContext.strokeStyle = gradient;
+          // Draw tag + score + bounds
+          this.canvasContext.strokeText(obj.label == "mask" ? "Mask" : "Not Mask", obj.box.left - 8, obj.box.top - 4);
+          this.canvasContext.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
+          this.canvasContext.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
+        });
+      })
+      ////////////////////////
+      //// End Prediction ////
+      ////////////////////////
+    }).catch(console.log);
   },
+  // Function that creates an HTMLImageElement
+  // only important thing to know is that once
+  // the image is created, the predict function
+  // is called to that new image, the function go is
+  // called when the <input type="file"> is uploaded
   go: function(evt) {
     var tgt = evt.target || window.event.srcElement,
       files = tgt.files;
@@ -160,6 +225,7 @@ Vue.component('mask-photo', {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+// Don't do this at home or the entire universe will probably explode
 Vue.component('mask-video', {
   data: function() {
     return {
@@ -174,7 +240,18 @@ Vue.component('mask-video', {
   mounted: function() {
   },
   methods: {
+    // Function that creates an HTMLVideoELement
+    // called when the <input type="file"> is uploaded
+    // When the video is loaded, this makes an stream processing for
+    // capturing the frames and makes predictions for each one
+    // When the frame list ${array} is ready, make a compression and
+    // Get the non redundant frames from the video.
+    // The video is resized to 640x480p, for a little speedUp.
+    // ¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡   SPOOKY ALERT  !!!!!!!!!!!!!!!!!!!!!
+    // The video variable is called ghost because it really doesn't show on the DOM
+    // All visualization is provided by canvas draws with an fps
     go: function(evt) {
+      // Load TensorFlowjs AutoML-offline-exported model locally
       tf.automl.loadObjectDetection('/static/model.json').then(model => {
         var videoGhost = document.createElement('video');
 
@@ -202,6 +279,7 @@ Vue.component('mask-video', {
 
         var playBttn = document.createElement("button");
 
+        // When data loading ends to the video
         var initVideo = function(e) {
           canvas.width =  640;//this.videoWidth;
           auxcvs.width =  640;//this.videoWidth;
@@ -213,22 +291,29 @@ Vue.component('mask-video', {
           console.log(videoGhost.width, videoGhost.height, videoGhost.videoWidth, videoGhost.videoHeight);
         }
 
+        // When video is on playing status
         var captureFrame = function(e) {
           videoGhost.pause();
           //auxctx.drawImage(videoGhost, 0, 0);
+          // ¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡   SPOOKY ALERT  !!!!!!!!!!!!!!!!!!!!!
+          // This does not show, is another auxiliar ghost
           auxctx.drawImage(videoGhost, 0, 0, videoGhost.videoWidth, videoGhost.videoHeight, 0, 0, 640, 480);
-
+          // Store a blob of a compressed 640x480 image
           array.push({
             blob: auxcvs.toDataURL("image/png"),
             timeOffset: videoGhost.currentTime,
           });
+          // Progress of Frame Loading
           pro.innerHTML = "Loaded " + ((videoGhost.currentTime / duration) * 100).toFixed(2) + ' %';
 
           if (videoGhost.currentTime < videoGhost.duration)
             videoGhost.play();
         }
+        // Once ghost video ends processing
         var lastStep = function(e) {
           //console.log(array.length);
+          // Compression of redundant frames !!! Same timestamp and
+          // inserted in the same order so take profit!
           array.forEach((item, idx) => {
             if (idx > 0 && item.timeOffset !== array[idx - 1].timeOffset)
                 newArr.push(item);
@@ -241,16 +326,26 @@ Vue.component('mask-video', {
               let img = document.createElement('img');
               img.src = newArr[i].blob;
               img.onload = function(e) {
+                // When loaded, show process of Frames Tracking %
                 pro.innerHTML = "Tracked " + ((newArr[i].timeOffset / duration) * 100).toFixed(2) + ' %';
+                ////////////////////
+                //// Prediction ////
+                ////////////////////
                 model.detect(img, { score: 0.15, iou: 0.6, topk: 50 }).then((predictions) => {
                   delete newArr[i].blob;
                   count++;
                   URL.revokeObjectURL(this.src);
                   newArr[i].preds = predictions;
+
+                  // LAST CASE
+                  // IF THERE IS NO MORE STORED FRAMES TO PREDICT ON
                   if (count == newArr.length) {
                     document.getElementById("progress").remove();
                     document.getElementById("prediction").remove();
+
+                    // Appears play button
                     document.getElementById("thatcontainer").appendChild(playBttn);
+                    // Appears Video Drawing by canvas
                     document.getElementById("thatcontainer").appendChild(canvas);
 
                     videoGhost.removeEventListener("loadedmetadata", initVideo, false);
@@ -262,10 +357,14 @@ Vue.component('mask-video', {
 
                     videoGhost.addEventListener('ended', function (e) { thatFlag = false; }, false);
 
+                    // Preview first frame and pause
                     videoGhost.pause();
                     videoGhost.currentTime = 0;
                     ctx.drawImage(videoGhost, 0, 0, videoGhost.videoWidth, videoGhost.videoHeight, 0, 0, 640, 480);
 
+                    // When clicking play button, starts playing video
+                    // REMEMBER FOR THE SPOOKY BOYS
+                    // Its not an HTMLVideoELement, its full made of canvas
                     playBttn.onclick = function() {
                       if (!thatFlag) {
                         thatFlag = true;
@@ -276,30 +375,47 @@ Vue.component('mask-video', {
                     }
                     playBttn.innerHTML = "Play"
 
-                  }
+                  } // END LAST CASE
+
                 });
+                ////////////////////////
+                //// End Prediction ////
+                ////////////////////////
               };
             }
             URL.revokeObjectURL(this.src);
         }
+
         var finalGo = function() {
+            /*
+            * NOW WE HAVE:
+            * * * STORED PREDICTIONS
+            * * * STORED TIMESTAMPS OF PREDICTIONS
+            */
             for (let i = 0; i < newArr.length; i++) {
               setTimeout(() => {
                 //ctx.drawImage(videoGhost, 0, 0);
+                // NO MORE GHOSTS HERE
+                // STOP SPOOKY AF STUFF
+                // This actually shows on
                 ctx.drawImage(videoGhost, 0, 0, videoGhost.videoWidth, videoGhost.videoHeight, 0, 0, 640, 480);
                 if (newArr[i].preds !== []) {
-                  videoGhost.pause();
+                  videoGhost.pause(); // Temporally for drawing
+                  // For each found subject
                   newArr[i].preds.forEach((obj) => {
                     let gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+                    // Color of box depending on label
                     gradient.addColorStop("1.0", obj.label == "mask" ? "lightgreen" : "red");
                     ctx.strokeStyle = gradient;
+                    // Draw tag + score + bounds
                     ctx.strokeText(obj.label == "mask" ? "Mask" : "NoMask", obj.box.left - 8, obj.box.top - 4);
                     ctx.strokeText((obj.score * 100).toFixed(2) + "%", obj.box.left + obj.box.width * 0.75 , obj.box.top - 4);
                     ctx.strokeRect(obj.box.left, obj.box.top, obj.box.width, obj.box.height);
                   });
-                  videoGhost.play();
+                  videoGhost.play(); // Resume
                 }
-              }, newArr[i].timeOffset * 1000);
+                // We know here when to place the box
+              }, newArr[i].timeOffset * 1000); // end setTimeout
             }
             console.log(`Found ${newArr.length} tracks!`);
         }
@@ -309,6 +425,7 @@ Vue.component('mask-video', {
         videoGhost.addEventListener('ended', lastStep, false);
 
         videoGhost.muted = true;
+        // Start loading from <input type="file"> element of the component
         videoGhost.src = URL.createObjectURL(document.getElementById("vidInput").files[0]);
         videoGhost.play();
       });
@@ -330,6 +447,9 @@ Vue.component('mask-video', {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+// Single Page Application
+// Three Functions, Three Sections
+// Only displays in function of selected button
 var options = {
   el: "#app",
   data: {
@@ -339,6 +459,9 @@ var options = {
   video: false,
   },
   methods: {
+  // When clicking a button,
+  // disable every other
+  // components in the DOM
   resetDisplay() {
     this.photo = false;
     this.live = false;
