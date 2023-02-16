@@ -4,7 +4,7 @@ google-cloud-storage==1.24.1
 google-cloud-vision==0.33.0
 pillow==7.1.2
 opencv-python
-werkzeug==1.0.1
+werkzeug==2.2.3
 flask-fs
 connexion==2.6.0
 natsort==7.0.1
